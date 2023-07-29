@@ -84,6 +84,8 @@ public class Parser {
         parsedData.add(parseSuspensionPosition(data));
         parsedData.add(parseSuspensionVelocity(data));
         parsedData.add(parseWheelVelocity(data));
+        parsedData.add(parseJunk(data));
+        parsedData.add(parseNonZeroJunk(data));
         return parsedData;
     }
 
@@ -235,6 +237,35 @@ public class Parser {
         parsedData.add(ByteBuffer.wrap(getBytes(104, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(108, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(112, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        return parsedData;
+    }
+
+    public ArrayList<String> parseJunk(byte[] data) {
+        ArrayList<String> parsedData = new ArrayList<>();
+        parsedData.add("ZeroJunk");
+        parsedData.add(ByteBuffer.wrap(getBytes(160, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(164, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(168, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(172, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(176, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(180, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(184, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(188, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(192, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(196, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(200, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(220, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(224, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(228, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(232, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(236, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        return parsedData;
+    }
+
+    public ArrayList<String> parseNonZeroJunk(byte[] data) {
+        ArrayList<String> parsedData = new ArrayList<>();
+        parsedData.add("NonZeroJunk");
+        parsedData.add(ByteBuffer.wrap(getBytes(152, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         return parsedData;
     }
 }

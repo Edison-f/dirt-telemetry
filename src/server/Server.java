@@ -3,11 +3,6 @@ package server;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -18,8 +13,7 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-        server.createContext("/echo", new TelemetryHandler(receiver));
-        server.createContext("/rpm", new RPMHandler(receiver));
+        server.createContext("/telemetry", new TelemetryHandler(receiver));
         server.createContext("/view", new PageHandler("index.html"));
         server.createContext("/script.js", new PageHandler("script.js"));
         server.createContext("/style.css", new PageHandler("style.css"));
@@ -53,77 +47,23 @@ class TelemetryHandler implements HttpHandler {
             os.close();
             return;
         }
-        for (ArrayList<String> list : data) {
-            for (String s : list) {
-                response.append(s).append("\t");
+        response.append("\"{");
+        for (int i = 0; i < data.size(); i++) {
+            ArrayList<String> list = data.get(i);
+            response.append("\\\"").append(list.get(0)).append("\\\": [");
+            for (int j = 1; j < list.size(); j++) {
+                String s = list.get(j);
+                response.append(s);
+                if(j != list.size() - 1) {
+                    response.append(", ");
+                }
             }
-            response.append("\n");
+            response.append("]");
+            if(i != data.size() - 1) {
+                response.append(",");
+            }
         }
-        xchg.sendResponseHeaders(200, response.length());
-        OutputStream os = xchg.getResponseBody();
-        os.write(response.toString().getBytes());
-        os.close();
-    }
-}
-
-class RPMHandler implements HttpHandler {
-    Receiver receiver;
-
-    public RPMHandler(Receiver receiver) {
-        super();
-        this.receiver = receiver;
-    }
-
-    public void handle(HttpExchange xchg) throws IOException {
-        xchg.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-
-        if (xchg.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
-            xchg.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
-            xchg.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
-            xchg.sendResponseHeaders(204, -1);
-            return;
-        }
-        StringBuilder response = new StringBuilder();
-        ArrayList<String> data = receiver.getAll().get(0);
-        if (data == null) {
-            xchg.sendResponseHeaders(200, 0);
-            OutputStream os = xchg.getResponseBody();
-            os.close();
-            return;
-        }
-        for (String s : data) {
-            response.append(s).append("\n");
-        }
-        xchg.sendResponseHeaders(200, response.length());
-        OutputStream os = xchg.getResponseBody();
-        os.write(response.toString().getBytes());
-        os.close();
-    }
-}
-
-class SpeedHandler implements HttpHandler {
-    Receiver receiver;
-
-    public SpeedHandler(Receiver receiver) {
-        super();
-        this.receiver = receiver;
-    }
-
-    public void handle(HttpExchange xchg) throws IOException {
-        Headers headers = xchg.getRequestHeaders();
-        Set<Map.Entry<String, List<String>>> entries = headers.entrySet();
-
-        StringBuilder response = new StringBuilder();
-        ArrayList<String> data = receiver.getAll().get(1);
-        if (data == null) {
-            xchg.sendResponseHeaders(200, 0);
-            OutputStream os = xchg.getResponseBody();
-            os.close();
-            return;
-        }
-        for (String s : data) {
-            response.append(s).append("\n");
-        }
+        response.append("}\"");
         xchg.sendResponseHeaders(200, response.length());
         OutputStream os = xchg.getResponseBody();
         os.write(response.toString().getBytes());
