@@ -1,0 +1,16 @@
+#rpmLow {
+    background-color: greenyellow;
+}
+
+#rpmMid {
+    background-color: orange;
+}
+
+#rpmHigh {
+    background-color: red;
+}
+
+.meter {
+    padding: 0px;
+    margin: -2px;
+}

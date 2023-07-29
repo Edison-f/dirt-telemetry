@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DirtTelemetry:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DirtTelemetry_jar</output-path>
+    <root id="archive" name="DirtTelemetry.jar">
+      <element id="module-output" name="DirtTelemetry" />
+    </root>
+  </artifact>
+</component>

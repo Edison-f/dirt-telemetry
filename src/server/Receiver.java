@@ -66,7 +66,6 @@ public class Receiver {
         } catch (IOException e) {
             System.out.println(e);
         } finally {
-            System.out.println("Closing socket");
             serverSocket.close();
         }
         return null;
