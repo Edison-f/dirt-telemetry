@@ -1,3 +1,5 @@
+package server;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -13,20 +15,20 @@ import java.util.ArrayList;
  * Roll Vector:             44-48, 48-52, 52-56
  * Pitch Vector:            56-60, 60-64, 64-68
  * Suspension Positions:
- *      Rear Left:          68-72
- *      Rear Right:         72-76
- *      Front Left:         76-80
- *      Front Right:        80-84
+ * Rear Left:          68-72
+ * Rear Right:         72-76
+ * Front Left:         76-80
+ * Front Right:        80-84
  * Suspension Velocity:
- *      Rear Left:          84-88
- *      Rear Right:         88-92
- *      Front Left:         92-96
- *      Front Right:        96-100
+ * Rear Left:          84-88
+ * Rear Right:         88-92
+ * Front Left:         92-96
+ * Front Right:        96-100
  * Wheel Velocity:
- *      Rear Left:          100-104
- *      Rear Right:         104-108
- *      Front Left:         108-112
- *      Front Right:        112-116
+ * Rear Left:          100-104
+ * Rear Right:         104-108
+ * Front Left:         108-112
+ * Front Right:        112-116
  * Throttle:                116-120
  * Steer:                   120-124
  * Brake:                   124-128
@@ -48,10 +50,10 @@ import java.util.ArrayList;
  * Junk:                    196-200
  * Junk:                    200-204
  * Brake Temperature:
- *      Rear Left:          204-208
- *      Rear Right:         208-212
- *      Front Left:         212-216
- *      Front Right:        216-220
+ * Rear Left:          204-208
+ * Rear Right:         208-212
+ * Front Left:         212-216
+ * Front Right:        216-220
  * Junk:                    220-224
  * Junk:                    224-228
  * Junk:                    228-232
@@ -66,12 +68,22 @@ import java.util.ArrayList;
 public class Parser {
     public ArrayList<ArrayList<String>> parseAll(byte[] data) {
         ArrayList<ArrayList<String>> parsedData = new ArrayList<>();
-        byte[] curr = new byte[4];
-        ArrayList<String> RPM = new ArrayList<>();
-        RPM.add("RPM");
-        RPM.add(ByteBuffer.wrap(getBytes(148, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(RPM);
-
+        parsedData.add(parseRPM(data));
+        parsedData.add(parseSpeed(data));
+        parsedData.add(parseGear(data));
+        parsedData.add(parseVelocity(data));
+        parsedData.add(parseInputs(data));
+        parsedData.add(parsePosition(data));
+        parsedData.add(parseBrakeTemp(data));
+        parsedData.add(parseLapInfo(data));
+        parsedData.add(parseGForces(data));
+        parsedData.add(parseTrackInfo(data));
+        parsedData.add(parseTimingInfo(data));
+        parsedData.add(parseRoll(data));
+        parsedData.add(parsePitch(data));
+        parsedData.add(parseSuspensionPosition(data));
+        parsedData.add(parseSuspensionVelocity(data));
+        parsedData.add(parseWheelVelocity(data));
         return parsedData;
     }
 
