@@ -5,57 +5,74 @@ window.onload = function () {
 
 async function loop() {
 
+    var rotate = 0
+
     while (true) {
-        let data
+        var data
         await getData().then((result) => {
             data = JSON.parse(result)
         })
+        if(rotate == 361) {
+            rotate = 1
+        }
         document.getElementById("rpmNumber").innerHTML = data["RPM"];
         rpmMeter(data["RPM"])
         checkJunk(data["ZeroJunk"], data["NonZeroJunk"], data["RPM"])
+        lapInfo(data["Lap Info"])
+        draw(data["RPM"])
+        rotate += 0.1;
         await sleep(16)
     }
 }
 
+function lapInfo(data) {
+    document.getElementById("lapInfo").innerHTML = data.join(", ")
+}
+
 function checkJunk(zeroJunk, nonZeroJunk, valid) {
-    for (let i = 0; i < zeroJunk.length; i++) {
-        let zeroMarker = document.getElementById("zeroChangeMarker").innerHTML
-        if (zeroJunk[i] != 0 && zeroMarker === "F") {
+    for (var i = 0; i < zeroJunk.length; i++) {
+        var zeroMarker = document.getElementById("zeroChangeMarker").innerHTML
+        if (zeroJunk[i] != 0 && zeroMarker === "F" && i != 8 && i != 9 && i != 10 && i != 15) {
             document.getElementById("zeroChangeMarker").innerHTML = "T " + i + " " + zeroJunk[i]
         }
     }
-    for (let i = 0; i < nonZeroJunk.length; i++) {
+    for (var i = 0; i < nonZeroJunk.length; i++) {
 
-        let nonZeroMarker = document.getElementById("nonZeroChangeMarker").innerHTML
+        var nonZeroMarker = document.getElementById("nonZeroChangeMarker").innerHTML
         if (nonZeroJunk[i] != 1 && nonZeroMarker === "F" && valid[1] != 0) {
             document.getElementById("nonZeroChangeMarker").innerHTML = "T " + i + " " + nonZeroJunk[i]
 
         }
 
     }
+    var str = ""
+    for (var i = 0; i < zeroJunk.length; i++) {
+        str += "(" + i + " " + zeroJunk[i] + "), "
+    }
+    document.getElementById("splits").innerHTML = str
 }
 
 function rpmMeter(data) {
-    let max = data[1]
-    let curr = data[0]
-    let maxStr = "";
-    for (let i = 0; i <= Math.ceil(max / 100); i++) {
+    var max = data[1]
+    var curr = data[0]
+    var maxStr = "";
+    for (var i = 0; i <= Math.ceil(max / 100); i++) {
         maxStr += i + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
     }
-    let lowStr = ""
-    for (let i = 0; i <= (Math.ceil(max / 100)) / 2; i++) {
+    var lowStr = ""
+    for (var i = 0; i <= (Math.ceil(max / 100)) / 2; i++) {
         if (curr > i * 100) {
             lowStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
         }
     }
-    let medStr = ""
-    for (let i = (Math.ceil(max / 100)) / 2; i <= (Math.ceil(max / 100)) / 1.33; i++) {
+    var medStr = ""
+    for (var i = (Math.ceil(max / 100)) / 2; i <= (Math.ceil(max / 100)) / 1.33; i++) {
         if (curr > i * 100) {
             medStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
         }
     }
-    let highStr = ""
-    for (let i = (Math.ceil(max / 100)) / 1.33; i <= (Math.ceil(max / 100)); i++) {
+    var highStr = ""
+    for (var i = (Math.ceil(max / 100)) / 1.33; i <= (Math.ceil(max / 100)); i++) {
         if (curr > i * 100) {
             highStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
         }
@@ -67,16 +84,16 @@ function rpmMeter(data) {
 }
 
 async function getData() {
-    let myHeaders = new Headers();
+    var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
-    let requestOptions = {
+    var requestOptions = {
         method: 'GET',
         headers: myHeaders,
         redirect: 'follow'
     };
 
-    let res;
+    var res;
 
     await fetch("http://127.0.0.1:8000/telemetry", requestOptions)
         .then(response => response.text())
@@ -87,16 +104,16 @@ async function getData() {
 }
 
 async function getRPM() {
-    let myHeaders = new Headers();
+    var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
-    let requestOptions = {
+    var requestOptions = {
         method: 'GET',
         headers: myHeaders,
         redirect: 'follow'
     };
 
-    let rpm = NaN;
+    var rpm = NaN;
 
     await fetch("http://127.0.0.1:8000/rpm", requestOptions)
         .then(response => response.text())
@@ -108,5 +125,38 @@ async function getRPM() {
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function draw(rpm) {
+    var canvas = document.getElementById("canvas");
+    canvas.width = 600;
+    canvas.height = 600;
+    var context = canvas.getContext("2d");
+    context.scale(1, 1);
+    var currRPM = rpm[0];
+    var maxRPM = rpm[1] + 50;
+
+    // RPM Needle
+    context.lineWidth = 2;
+    context.save();
+    context.translate(300, 300);
+    context.rotate((currRPM / maxRPM) * 3 + Math.PI)
+    context.fillRect(0, 0, 150, 10);
+    context.restore();
+
+    // RPM Numbers
+    for(var i = 0; i < Math.ceil(maxRPM / 100); i++) {
+        var x = Math.cos(Math.PI + (i / Math.ceil(maxRPM / 100)) * Math.PI) * 180 + 300;
+        var y = Math.sin(Math.PI + (i / Math.ceil(maxRPM / 100)) * Math.PI) * 180 + 300;
+        context.save();
+        context.font = "24px Times New Roman"
+        context.fillText(i + "", x, y)
+        context.restore()
+    }
+    context.save()
+    context.fillStyle = "rgb(255, 0, 0)"
+    context.font = "32px Times New Roman"
+    context.fillText(Math.ceil(maxRPM / 100), 480, 300)
+    context.restore()
 }
 

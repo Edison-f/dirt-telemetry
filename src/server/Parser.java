@@ -46,9 +46,9 @@ import java.util.ArrayList;
  * Junk:                    180-184 // Also copilot generated
  * Junk:                    184-188 // Also copilot generated
  * Junk:                    188-192 // Also copilot generated
- * Junk:                    192-196
- * Junk:                    196-200
- * Junk:                    200-204
+ * Split Number:            192-196 //TODO
+ * Split 1 Time:            196-200
+ * Split 2 Time:            200-204
  * Brake Temperature:
  * Rear Left:          204-208
  * Rear Right:         208-212
@@ -58,7 +58,7 @@ import java.util.ArrayList;
  * Junk:                    224-228
  * Junk:                    228-232
  * Junk:                    232-236
- * Junk:                    236-240
+ * Laps Completed:          236-240 //TODO
  * Total Laps:              240-244
  * Track Length:            244-248
  * Last Lap Time:           248-252
@@ -159,6 +159,7 @@ public class Parser {
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Lap Info");
         parsedData.add(ByteBuffer.wrap(getBytes(144, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(236, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + ""); // turns to 1 on end
         parsedData.add(ByteBuffer.wrap(getBytes(240, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(248, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         return parsedData;
@@ -251,14 +252,13 @@ public class Parser {
         parsedData.add(ByteBuffer.wrap(getBytes(180, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(184, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(188, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(192, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(196, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(200, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(ByteBuffer.wrap(getBytes(192, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + ""); //s#
+        parsedData.add(ByteBuffer.wrap(getBytes(196, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + ""); //s1
+        parsedData.add(ByteBuffer.wrap(getBytes(200, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");//s2
         parsedData.add(ByteBuffer.wrap(getBytes(220, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(224, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(228, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         parsedData.add(ByteBuffer.wrap(getBytes(232, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(236, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
         return parsedData;
     }
 
