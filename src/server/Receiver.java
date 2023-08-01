@@ -51,6 +51,7 @@ public class Receiver {
         DatagramSocket serverSocket = null;
         try {
             serverSocket = new DatagramSocket(20777);
+            serverSocket.setReuseAddress(true);
             byte[] receiveData = new byte[256];
             String sendString = "polo";
             byte[] sendData = sendString.getBytes("UTF-8");
