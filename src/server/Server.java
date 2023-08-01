@@ -17,6 +17,7 @@ public class Server {
         server.createContext("/view", new PageHandler("index.html"));
         server.createContext("/script.js", new PageHandler("script.js"));
         server.createContext("/style.css", new PageHandler("style.css"));
+        server.createContext("/module", new QueryHandler());
         server.start();
     }
 }
@@ -102,5 +103,34 @@ class PageHandler implements HttpHandler {
         OutputStream os = xchg.getResponseBody();
         os.write(response.getBytes());
         os.close();
+    }
+}
+
+class QueryHandler implements HttpHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        File curr;
+        String response = "i'm a teapot";
+        String query = exchange.getRequestURI().getQuery().substring(2);
+        String[] moduleList = query.split(",");
+        for (String s :
+                moduleList) {
+            System.out.println(s);
+        }
+        OutputStream os;
+        if(query.isEmpty()) {
+            exchange.sendResponseHeaders(418, "i'm a teapot".length());
+            os = exchange.getResponseBody();
+            os.write("i'm a teapot".getBytes());
+        } else {
+            exchange.sendResponseHeaders(418, response.length());
+            os = exchange.getResponseBody();
+            os.write(response.getBytes());
+        }
+        os.close();
+    }
+
+    private String buildFile(ArrayList<File> files) {
+        return null;
     }
 }

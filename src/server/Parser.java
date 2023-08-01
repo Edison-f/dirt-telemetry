@@ -38,23 +38,25 @@ import java.util.ArrayList;
  * Longitudinal G-force:    140-144
  * Current Lap:             144-148
  * RPM:                     148-152
- * ?:                       152-156 // For some reason this is 1.0 always
+ * Shift Light Support:     152-156
  * Position:                156-160
- * Junk:                    160-164
- * Junk:                    164-168, 168-172, 172-176 // Also copilot generated
- * Junk:                    176-180 // Also copilot generated
- * Junk:                    180-184 // Also copilot generated
- * Junk:                    184-188 // Also copilot generated
- * Junk:                    188-192 // Also copilot generated
+ * Regen Brake Level:       160-164
+ * Regen Brake Max Level:   164-168
+ * Drag Reduction System:   168-172
+ * Traction Control:        172-176
+ * Anti-Lock Brakes:        176-180
+ * Fuel in Tank:            180-184
+ * Fuel Capacity:           184-188
+ * In Pit:                  188-192
  * Split Number:            192-196 //TODO
  * Split 1 Time:            196-200
  * Split 2 Time:            200-204
  * Brake Temperature:
- * Rear Left:          204-208
- * Rear Right:         208-212
- * Front Left:         212-216
- * Front Right:        216-220
- * Junk:                    220-224
+ *      Rear Left:          204-208
+ *      Rear Right:         208-212
+ *      Front Left:         212-216
+ *      Front Right:        216-220
+ * Junk:                    220-224 // Next 4 supposedly tire pressure
  * Junk:                    224-228
  * Junk:                    228-232
  * Junk:                    232-236

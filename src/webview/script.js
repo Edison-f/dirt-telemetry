@@ -3,24 +3,19 @@ window.onload = function () {
     loop()
 }
 
+var modules = []
+
 async function loop() {
-
-    var rotate = 0
-
     while (true) {
         var data
         await getData().then((result) => {
             data = JSON.parse(result)
         })
-        if(rotate == 361) {
-            rotate = 1
-        }
         document.getElementById("rpmNumber").innerHTML = data["RPM"];
         rpmMeter(data["RPM"])
         checkJunk(data["ZeroJunk"], data["NonZeroJunk"], data["RPM"])
         lapInfo(data["Lap Info"])
-        draw(data["RPM"])
-        rotate += 0.1;
+        draw(data)
         await sleep(16)
     }
 }
@@ -127,7 +122,8 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function draw(rpm) {
+function draw(data) {
+    var rpm = data["RPM"]
     var canvas = document.getElementById("canvas");
     canvas.width = 600;
     canvas.height = 600;
@@ -160,3 +156,24 @@ function draw(rpm) {
     context.restore()
 }
 
+async function add() {
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+
+    var res
+
+    var query = document.getElementById("mods").value
+    console.log(query)
+    await fetch("http://127.0.0.1:8000/module?q=" + query, requestOptions)
+        .then(response => response.text())
+        .then(result => res = result)
+        .catch(error => console.log('error', error));
+
+    console.log(res)
+}

@@ -63,11 +63,12 @@ public class Receiver {
                     receivePacket.getAddress(), receivePacket.getPort());
             serverSocket.send(sendPacket);
             return parser.parseAll(data);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e);
         } finally {
             serverSocket.close();
         }
+        System.out.println("No information found");
         return null;
     }
 
