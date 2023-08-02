@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.concurrent.*;
 
 
 public class Receiver {
@@ -57,8 +58,26 @@ public class Receiver {
             byte[] sendData = sendString.getBytes("UTF-8");
             DatagramPacket receivePacket = new DatagramPacket(receiveData,
                     receiveData.length);
-            serverSocket.receive(receivePacket);
-            byte[] data = receivePacket.getData();
+            byte[] data = null;
+            ExecutorService executor = Executors.newCachedThreadPool();
+            DatagramSocket finalServerSocket = serverSocket;
+            Callable<Object> task = new Callable<Object>() {
+                public Object call() throws IOException {
+                    finalServerSocket.receive(receivePacket);
+                    return null;
+                }
+            };
+            Future<Object> future = executor.submit(task);
+            try {
+                Object result = future.get(100, TimeUnit.MILLISECONDS);
+            } catch (Exception ignored) {
+                System.out.println("Timeout - No data found from game");
+                serverSocket.close();
+                return null;
+            } finally {
+                future.cancel(true); // may or may not desire this
+            }
+            data = receivePacket.getData();
             // now send acknowledgement packet back to sender
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
                     receivePacket.getAddress(), receivePacket.getPort());
