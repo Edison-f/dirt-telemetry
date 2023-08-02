@@ -42,15 +42,13 @@ class TelemetryHandler implements HttpHandler {
         }
         StringBuilder response = new StringBuilder();
         ArrayList<ArrayList<String>> data = receiver.getAll();
-        while(data == null) {
-            data = receiver.getAll();
+
+        if (data == null) {
+            xchg.sendResponseHeaders(200, 0);
+            OutputStream os = xchg.getResponseBody();
+            os.close();
+            return;
         }
-//        if (data == null) {
-//            xchg.sendResponseHeaders(200, 0);
-//            OutputStream os = xchg.getResponseBody();
-//            os.close();
-//            return;
-//        }
         response.append("\"{");
         for (int i = 0; i < data.size(); i++) {
             ArrayList<String> list = data.get(i);

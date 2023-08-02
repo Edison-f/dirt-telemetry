@@ -8,15 +8,20 @@ var modules = []
 async function loop() {
     while (true) {
         var data
-        await getData().then((result) => {
-            data = JSON.parse(result)
-        })
-        document.getElementById("rpmNumber").innerHTML = data["RPM"];
-        rpmMeter(data["RPM"])
-        checkJunk(data["ZeroJunk"], data["NonZeroJunk"], data["RPM"])
-        lapInfo(data["Lap Info"])
-        draw(data)
-        await sleep(16)
+        try {
+            await getData().then((result) => {
+                data = JSON.parse(result)
+            })
+            document.getElementById("rpmNumber").innerHTML = data["RPM"];
+            rpmMeter(data["RPM"])
+            checkJunk(data["ZeroJunk"], data["NonZeroJunk"], data["RPM"])
+            lapInfo(data["Lap Info"])
+            draw(data)
+            await sleep(16)
+        } catch (ignored) {
+            console.log("Waiting for data")
+            await sleep(5000)
+        }
     }
 }
 
