@@ -2,26 +2,26 @@ package server;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 
 
 public class Receiver {
 
-    private Parser parser = new Parser();
+    private final Parser parser = new Parser();
 
     public static void main(String[] args) {
         int port = args.length == 0 ? 20777 : Integer.parseInt(args[0]);
         new Receiver().run(port);
     }
 
+    @SuppressWarnings("InfiniteLoopStatement")
     public void run(int port) {
-        DatagramSocket serverSocket = null;
-        try {
-            serverSocket = new DatagramSocket(port);
+        try (DatagramSocket serverSocket = new DatagramSocket(port)) {
             byte[] receiveData = new byte[256];
             String sendString = "polo";
-            byte[] sendData = sendString.getBytes("UTF-8");
+            byte[] sendData = sendString.getBytes(StandardCharsets.UTF_8);
 
             System.out.printf("Listening on udp:%s:%d%n",
                     InetAddress.getLocalHost().getHostAddress(), port);
@@ -30,12 +30,9 @@ public class Receiver {
 
             while (true) {
                 serverSocket.receive(receivePacket);
-//                String sentence = new String( receivePacket.getData(), 0,
-//                        receivePacket.getLength() );
                 byte[] data = receivePacket.getData();
                 System.out.print("RECEIVED: ");
                 printArray(parser.parseGForces(data));
-                // now send acknowledgement packet back to sender
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
                         receivePacket.getAddress(), receivePacket.getPort());
                 serverSocket.send(sendPacket);
@@ -44,49 +41,40 @@ public class Receiver {
             System.out.println(e);
         } finally {
             System.out.println("Closing socket");
-            serverSocket.close();
         }
     }
 
     public ArrayList<ArrayList<String>> getAll() {
-        DatagramSocket serverSocket = null;
-        try {
-            serverSocket = new DatagramSocket(20777);
+        try (DatagramSocket serverSocket = new DatagramSocket(20777)) {
             serverSocket.setReuseAddress(true);
             byte[] receiveData = new byte[256];
             String sendString = "polo";
-            byte[] sendData = sendString.getBytes("UTF-8");
+            byte[] sendData = sendString.getBytes(StandardCharsets.UTF_8);
             DatagramPacket receivePacket = new DatagramPacket(receiveData,
                     receiveData.length);
-            byte[] data = null;
+            byte[] data;
             ExecutorService executor = Executors.newCachedThreadPool();
-            DatagramSocket finalServerSocket = serverSocket;
-            Callable<Object> task = new Callable<Object>() {
-                public Object call() throws IOException {
-                    finalServerSocket.receive(receivePacket);
-                    return null;
-                }
+            Callable<Object> task = () -> {
+                serverSocket.receive(receivePacket);
+                return null;
             };
             Future<Object> future = executor.submit(task);
             try {
-                Object result = future.get(100, TimeUnit.MILLISECONDS);
+                future.get(100, TimeUnit.MILLISECONDS);
             } catch (Exception ignored) {
                 System.out.println("Timeout - No data found from game");
                 serverSocket.close();
                 return null;
             } finally {
-                future.cancel(true); // may or may not desire this
+                future.cancel(true);
             }
             data = receivePacket.getData();
-            // now send acknowledgement packet back to sender
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
                     receivePacket.getAddress(), receivePacket.getPort());
             serverSocket.send(sendPacket);
             return parser.parseAll(data);
         } catch (Exception e) {
             System.out.println(e);
-        } finally {
-            serverSocket.close();
         }
         System.out.println("No information found");
         return null;

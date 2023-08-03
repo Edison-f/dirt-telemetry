@@ -93,9 +93,7 @@ public class Parser {
 
     public byte[] getBytes(int start, byte[] data) {
         byte[] result = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            result[i] = data[start + i];
-        }
+        System.arraycopy(data, start, result, 0, 4);
         return result;
     }
 

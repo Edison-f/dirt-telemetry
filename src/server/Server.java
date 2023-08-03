@@ -9,7 +9,7 @@ import com.sun.net.httpserver.HttpServer;
 
 public class Server {
 
-    static Receiver receiver = new Receiver();
+    static final Receiver receiver = new Receiver();
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
@@ -22,14 +22,7 @@ public class Server {
     }
 }
 
-class TelemetryHandler implements HttpHandler {
-    Receiver receiver;
-
-    public TelemetryHandler(Receiver receiver) {
-        super();
-
-        this.receiver = receiver;
-    }
+record TelemetryHandler(Receiver receiver) implements HttpHandler {
 
     public void handle(HttpExchange xchg) throws IOException {
         xchg.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
@@ -56,12 +49,12 @@ class TelemetryHandler implements HttpHandler {
             for (int j = 1; j < list.size(); j++) {
                 String s = list.get(j);
                 response.append(s);
-                if(j != list.size() - 1) {
+                if (j != list.size() - 1) {
                     response.append(", ");
                 }
             }
             response.append("]");
-            if(i != data.size() - 1) {
+            if (i != data.size() - 1) {
                 response.append(",");
             }
         }
@@ -73,67 +66,55 @@ class TelemetryHandler implements HttpHandler {
     }
 }
 
-class PageHandler implements HttpHandler {
-
-    String fileName;
-
-    public PageHandler(String fileName) {
-        super();
-        this.fileName = fileName;
-    }
+record PageHandler(String fileName) implements HttpHandler {
 
     public void handle(HttpExchange xchg) throws IOException {
         File file;
-        String response = "";
+        StringBuilder response = new StringBuilder();
         try {
             file = new File("src/webview/" + fileName);
-            BufferedReader bufferedReader =
-                    new BufferedReader(
-                            new InputStreamReader(
-                                    new FileInputStream(file)));
-            String curr = bufferedReader.readLine();
-            while(curr != null) {
-                response += curr + "\n";
-                curr = bufferedReader.readLine();
-            }
-            bufferedReader.close();
+            readFile(file, response);
         } catch (Exception e) {
             e.printStackTrace();
         }
         xchg.sendResponseHeaders(200, response.length());
         OutputStream os = xchg.getResponseBody();
-        os.write(response.getBytes());
+        os.write(response.toString().getBytes());
         os.close();
+    }
+
+    static void readFile(File file, StringBuilder response) throws IOException {
+        BufferedReader bufferedReader =
+                new BufferedReader(
+                        new InputStreamReader(
+                                new FileInputStream(file)));
+        String curr = bufferedReader.readLine();
+        while (curr != null) {
+            response.append(curr).append("\n");
+            curr = bufferedReader.readLine();
+        }
+        bufferedReader.close();
     }
 }
 
 class QueryHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String response = "";
+        StringBuilder response = new StringBuilder();
         String query = exchange.getRequestURI().getQuery().substring(2);
         String[] moduleList = query.split(",");
         for (String s :
                 moduleList) {
             System.out.println(s);
-            response += "<script>";
+            response.append("<script>");
             File file;
             try {
                 file = new File("src/module/" + s + ".js");
-                BufferedReader bufferedReader =
-                        new BufferedReader(
-                                new InputStreamReader(
-                                        new FileInputStream(file)));
-                String line = bufferedReader.readLine();
-                while(line != null) {
-                    response += line + "\n";
-                    line = bufferedReader.readLine();
-                }
-                bufferedReader.close();
+                PageHandler.readFile(file, response);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            response += "</script>";
+            response.append("</script>");
         }
         OutputStream os;
         if(query.isEmpty()) {
@@ -143,12 +124,9 @@ class QueryHandler implements HttpHandler {
         } else {
             exchange.sendResponseHeaders(200, response.length());
             os = exchange.getResponseBody();
-            os.write(response.getBytes());
+            os.write(response.toString().getBytes());
         }
         os.close();
     }
 
-    private String buildFile(ArrayList<File> files) {
-        return null;
-    }
 }
