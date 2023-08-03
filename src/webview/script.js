@@ -4,11 +4,13 @@ window.onload = function () {
 }
 
 var modules = []
+var canvasList = []
 
 async function loop() {
     while (true) {
         var data
         try {
+            // console.log(modules)
             await getData().then((result) => {
                 data = JSON.parse(result)
             })
@@ -128,15 +130,31 @@ function sleep(ms) {
 }
 
 function draw(data) {
-    var rpm = data["RPM"]
-    var canvas = document.getElementById("canvas");
-    canvas.width = 600;
-    canvas.height = 600;
-    var context = canvas.getContext("2d");
-    context.scale(1, 1);
-    var currRPM = rpm[0];
-    var maxRPM = rpm[1] + 50;
+    // var canvas = document.getElementById("canvas");
+    // canvas.width = 600;
+    // canvas.height = 600;
+    // var context = canvas.getContext("2d");
+    // context.scale(1, 1);
+    // var rpm = data["RPM"]
+    // var currRPM = rpm[0];
+    // var maxRPM = rpm[1] + 50;
+    for (var i = 0; i < modules.length; i++) {
+        var canvas;
+        if(i >= canvasList.length) {
+            canvas = document.createElement("canvas")
+            document.body.appendChild(canvas);
+            canvasList.push(canvas)
+        } else {
+            canvas = canvasList[i]
+        }
+        canvas.width = 600;
+        canvas.height = 600;
+        var context = canvas.getContext("2d");
+        context.scale(1, 1);
+        modules[i].draw(context, data)
+    }
 
+    /*
     // RPM Needle
     context.lineWidth = 2;
     context.save();
@@ -159,6 +177,7 @@ function draw(data) {
     context.font = "32px Times New Roman"
     context.fillText(Math.ceil(maxRPM / 100), 480, 300)
     context.restore()
+    */
 }
 
 async function add() {
@@ -177,8 +196,12 @@ async function add() {
     console.log(query)
     await fetch("http://127.0.0.1:8000/module?q=" + query, requestOptions)
         .then(response => response.text())
-        .then(result => res = result)
+        .then(result => document.getElementById("body").innerHTML += result)
         .catch(error => console.log('error', error));
 
-    console.log(res)
+    for (var i = query.split(",").length; i >= 0; i--) {
+        var scripts = document.querySelectorAll("script");
+        (0, eval)(scripts[scripts.length - 1 - i].textContent);
+    }
+    
 }

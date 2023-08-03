@@ -110,13 +110,30 @@ class PageHandler implements HttpHandler {
 class QueryHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        File curr;
-        String response = "i'm a teapot";
+        String response = "";
         String query = exchange.getRequestURI().getQuery().substring(2);
         String[] moduleList = query.split(",");
         for (String s :
                 moduleList) {
             System.out.println(s);
+            response += "<script>";
+            File file;
+            try {
+                file = new File("src/module/" + s + ".js");
+                BufferedReader bufferedReader =
+                        new BufferedReader(
+                                new InputStreamReader(
+                                        new FileInputStream(file)));
+                String line = bufferedReader.readLine();
+                while(line != null) {
+                    response += line + "\n";
+                    line = bufferedReader.readLine();
+                }
+                bufferedReader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            response += "</script>";
         }
         OutputStream os;
         if(query.isEmpty()) {
@@ -124,7 +141,7 @@ class QueryHandler implements HttpHandler {
             os = exchange.getResponseBody();
             os.write("i'm a teapot".getBytes());
         } else {
-            exchange.sendResponseHeaders(418, response.length());
+            exchange.sendResponseHeaders(200, response.length());
             os = exchange.getResponseBody();
             os.write(response.getBytes());
         }
