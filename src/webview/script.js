@@ -18,7 +18,7 @@ async function loop() {
             })
             document.getElementById("rpmNumber").innerHTML = data["RPM"];
             rpmMeter(data["RPM"])
-            draw(data)
+            await draw(data)
             await sleep(16)
         } catch (ignored) {
             console.log("Waiting for data")
@@ -82,17 +82,22 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function draw(data) {
+async function draw(data) {
+    let canvas;
+    let curr;
     for (let i = 0; i < modules.length; i++) {
-        let canvas;
-        if(i >= canvasList.length) {
+        if (canvasList[i] === undefined) {
+            console.log("new canvas")
+
             canvas = document.createElement("canvas")
+            canvas.id = "canvas" + i
             document.body.appendChild(canvas);
             canvasList.push(canvas)
         } else {
-            canvas = canvasList[i]
+            // canvas = canvasList[i]
+            canvas = document.getElementById("canvas" + i)
         }
-        const curr = modules[i];
+        curr = modules[i];
         canvas.width = curr.WIDTH;
         canvas.height = curr.HEIGHT;
         const context = canvas.getContext("2d");
@@ -119,9 +124,9 @@ async function add() {
         .then(result => document.getElementById("body").innerHTML += result)
         .catch(error => console.log('error', error));
 
-    for (let i = query.split(",").length; i >= 0; i--) {
-        const scripts = document.querySelectorAll("script");
-        (0, eval)(scripts[scripts.length - 1 - i].textContent);
+    const scripts = document.querySelectorAll("script");
+    for (let i = scripts.length - 1; i >= scripts.length - query.split(",").length; i--) {
+        (0, eval)(scripts[i].textContent);
     }
 
 }

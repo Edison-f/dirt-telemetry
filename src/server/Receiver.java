@@ -19,7 +19,7 @@ public class Receiver {
     @SuppressWarnings("InfiniteLoopStatement")
     public void run(int port) {
         try (DatagramSocket serverSocket = new DatagramSocket(port)) {
-            byte[] receiveData = new byte[256];
+            byte[] receiveData = new byte[512];
             String sendString = "polo";
             byte[] sendData = sendString.getBytes(StandardCharsets.UTF_8);
 
@@ -32,7 +32,7 @@ public class Receiver {
                 serverSocket.receive(receivePacket);
                 byte[] data = receivePacket.getData();
                 System.out.print("RECEIVED: ");
-                printArray(parser.parseGForces(data));
+                printArray(parser.parseWheelSlip(data));
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
                         receivePacket.getAddress(), receivePacket.getPort());
                 serverSocket.send(sendPacket);
@@ -47,7 +47,7 @@ public class Receiver {
     public ArrayList<ArrayList<String>> getAll() {
         try (DatagramSocket serverSocket = new DatagramSocket(20777)) {
             serverSocket.setReuseAddress(true);
-            byte[] receiveData = new byte[256];
+            byte[] receiveData = new byte[512];
             String sendString = "polo";
             byte[] sendData = sendString.getBytes(StandardCharsets.UTF_8);
             DatagramPacket receivePacket = new DatagramPacket(receiveData,

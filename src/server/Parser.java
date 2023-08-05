@@ -65,6 +65,8 @@ import java.util.ArrayList;
  * Track Length:            244-248
  * Last Lap Time:           248-252
  * Max RPM:                 252-256
+ * ?:                       256-260
+ * Max Gears:               260-264
  */
 
 public class Parser {
@@ -86,8 +88,6 @@ public class Parser {
         parsedData.add(parseSuspensionPosition(data));
         parsedData.add(parseSuspensionVelocity(data));
         parsedData.add(parseWheelVelocity(data));
-        parsedData.add(parseJunk(data));
-        parsedData.add(parseNonZeroJunk(data));
         return parsedData;
     }
 
@@ -100,172 +100,171 @@ public class Parser {
     public ArrayList<String> parseRPM(byte[] data) {
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("RPM");
-        parsedData.add(ByteBuffer.wrap(getBytes(148, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(252, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(148, data) + "");
+        parsedData.add(getFloat(252, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseSpeed(byte[] data) { // Data is in some weird format, about 1/3 of what it should be
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Speed");
-        parsedData.add(ByteBuffer.wrap(getBytes(28, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(28, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseGear(byte[] data) {
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Gear");
-        parsedData.add(ByteBuffer.wrap(getBytes(132, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(132, data) + "");
+        parsedData.add(getFloat(260, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseVelocity(byte[] data) { // X, Y, Z
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Velocity");
-        parsedData.add(ByteBuffer.wrap(getBytes(32, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(36, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(40, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(32, data) + "");
+        parsedData.add(getFloat(36, data) + "");
+        parsedData.add(getFloat(40, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseInputs(byte[] data) { // Throttle, Steer, Brake, Clutch
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Inputs");
-        parsedData.add(ByteBuffer.wrap(getBytes(116, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(120, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(124, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(128, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(116, data) + "");
+        parsedData.add(getFloat(120, data) + "");
+        parsedData.add(getFloat(124, data) + "");
+        parsedData.add(getFloat(128, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parsePosition(byte[] data) { // Sector 1, Sector 2, Sector 3
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Position");
-        parsedData.add(ByteBuffer.wrap(getBytes(156, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(156, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseBrakeTemp(byte[] data) { // Rear Left, Rear Right, Front Left, Front Right
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Brake Temperature");
-        parsedData.add(ByteBuffer.wrap(getBytes(204, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(208, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(212, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(216, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(204, data) + "");
+        parsedData.add(getFloat(208, data) + "");
+        parsedData.add(getFloat(212, data) + "");
+        parsedData.add(getFloat(216, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseLapInfo(byte[] data) { // Current Lap, Total Laps, Track Length, Last Lap Time
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Lap Info");
-        parsedData.add(ByteBuffer.wrap(getBytes(144, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(236, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + ""); // turns to 1 on end
-        parsedData.add(ByteBuffer.wrap(getBytes(240, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(248, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(144, data) + "");
+        parsedData.add(getFloat(236, data) + ""); // turns to 1 on end
+        parsedData.add(getFloat(240, data) + "");
+        parsedData.add(getFloat(248, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseTrackInfo(byte[] data) { // Track Length, Current Lap Distance, Distance, Location(3)
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Track Info");
-        parsedData.add(ByteBuffer.wrap(getBytes(244, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(8, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(12, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(16, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(20, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(24, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(244, data) + "");
+        parsedData.add(getFloat(8, data) + "");
+        parsedData.add(getFloat(12, data) + "");
+        parsedData.add(getFloat(16, data) + "");
+        parsedData.add(getFloat(20, data) + "");
+        parsedData.add(getFloat(24, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseGForces(byte[] data) { // Lateral, Longitudinal
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("G Forces");
-        parsedData.add(ByteBuffer.wrap(getBytes(136, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(140, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(136, data) + "");
+        parsedData.add(getFloat(140, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseTimingInfo(byte[] data) { // Time, Current Lap Time
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Timing Info");
-        parsedData.add(ByteBuffer.wrap(getBytes(0, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(4, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(0, data) + "");
+        parsedData.add(getFloat(4, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseRoll(byte[] data) { // Roll, Pitch, Yaw
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Roll");
-        parsedData.add(ByteBuffer.wrap(getBytes(44, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(48, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(52, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(44, data) + "");
+        parsedData.add(getFloat(48, data) + "");
+        parsedData.add(getFloat(52, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parsePitch(byte[] data) { // Roll, Pitch, Yaw
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Pitch");
-        parsedData.add(ByteBuffer.wrap(getBytes(56, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(60, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(64, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(56, data) + "");
+        parsedData.add(getFloat(60, data) + "");
+        parsedData.add(getFloat(64, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseSuspensionPosition(byte[] data) { // Rear Left, Rear Right, Front Left, Front Right
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Suspension Position");
-        parsedData.add(ByteBuffer.wrap(getBytes(68, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(72, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(76, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(80, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(68, data) + "");
+        parsedData.add(getFloat(72, data) + "");
+        parsedData.add(getFloat(76, data) + "");
+        parsedData.add(getFloat(80, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseSuspensionVelocity(byte[] data) { // Rear Left, Rear Right, Front Left, Front Right
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Suspension Velocity");
-        parsedData.add(ByteBuffer.wrap(getBytes(84, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(88, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(92, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(96, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(84, data) + "");
+        parsedData.add(getFloat(88, data) + "");
+        parsedData.add(getFloat(92, data) + "");
+        parsedData.add(getFloat(96, data) + "");
         return parsedData;
     }
 
     public ArrayList<String> parseWheelVelocity(byte[] data) { // Rear Left, Rear Right, Front Left, Front Right
         ArrayList<String> parsedData = new ArrayList<>();
         parsedData.add("Wheel Velocity");
-        parsedData.add(ByteBuffer.wrap(getBytes(100, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(104, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(108, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(112, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add(getFloat(100, data) + "");
+        parsedData.add(getFloat(104, data) + "");
+        parsedData.add(getFloat(108, data) + "");
+        parsedData.add(getFloat(112, data) + "");
         return parsedData;
     }
 
-    public ArrayList<String> parseJunk(byte[] data) {
+    private float getFloat(int start, byte[] data) {
+        return ByteBuffer.wrap(getBytes(start, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    }
+
+    public ArrayList<String> parseFrom(byte[] data, int start, int finish) {
         ArrayList<String> parsedData = new ArrayList<>();
-        parsedData.add("ZeroJunk");
-        parsedData.add(ByteBuffer.wrap(getBytes(160, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(164, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(168, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(172, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(176, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(180, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(184, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(188, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(192, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + ""); //s#
-        parsedData.add(ByteBuffer.wrap(getBytes(196, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + ""); //s1
-        parsedData.add(ByteBuffer.wrap(getBytes(200, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");//s2
-        parsedData.add(ByteBuffer.wrap(getBytes(220, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(224, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(228, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
-        parsedData.add(ByteBuffer.wrap(getBytes(232, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add("From " + start + " to " + (finish + 4));
+        for(int i = start; i < data.length && i <= finish; i += 4) {
+            parsedData.add(getFloat(i, data) + "");
+        }
         return parsedData;
     }
 
-    public ArrayList<String> parseNonZeroJunk(byte[] data) {
+    public ArrayList<String> parseWheelSlip(byte[] data) {
         ArrayList<String> parsedData = new ArrayList<>();
-        parsedData.add("NonZeroJunk");
-        parsedData.add(ByteBuffer.wrap(getBytes(152, data)).order(ByteOrder.LITTLE_ENDIAN).getFloat() + "");
+        parsedData.add("Wheel Slip");
+        float totalVelocity = Math.abs(getFloat(32, data))
+                + Math.abs(getFloat(36, data))
+                + Math.abs(getFloat(40, data));
+        parsedData.add(Math.abs(getFloat(100, data) - totalVelocity) + "");
+        parsedData.add(Math.abs(getFloat(104, data) - totalVelocity) + "");
+        parsedData.add(Math.abs(getFloat(108, data) - totalVelocity) + "");
+        parsedData.add(Math.abs(getFloat(112, data) - totalVelocity) + "");
         return parsedData;
     }
 }

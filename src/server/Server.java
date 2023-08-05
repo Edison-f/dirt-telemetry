@@ -69,12 +69,13 @@ record TelemetryHandler(Receiver receiver) implements HttpHandler {
 record PageHandler(String fileName) implements HttpHandler {
 
     public void handle(HttpExchange xchg) throws IOException {
-        File file;
+        File file = null;
         StringBuilder response = new StringBuilder();
         try {
-            file = new File("src/webview/" + fileName);
+            file = new File(System.getProperty("user.dir") + "/src/webview/" + fileName);
             readFile(file, response);
         } catch (Exception e) {
+            System.out.println(file.getPath());
             e.printStackTrace();
         }
         xchg.sendResponseHeaders(200, response.length());
@@ -105,13 +106,13 @@ class QueryHandler implements HttpHandler {
         String[] moduleList = query.split(",");
         for (String s :
                 moduleList) {
-            System.out.println(s);
             response.append("<script>");
-            File file;
+            File file = null;
             try {
-                file = new File("src/module/" + s + ".js");
+                file = new File(System.getProperty("user.dir") + "/src/module/" + s + ".js");
                 PageHandler.readFile(file, response);
             } catch (Exception e) {
+                System.out.println(file.getPath());
                 e.printStackTrace();
             }
             response.append("</script>");
