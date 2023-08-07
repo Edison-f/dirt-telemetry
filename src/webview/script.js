@@ -2,6 +2,11 @@
 
 window.onload = function () {
     console.log("loaded")
+    document.querySelector("#mods").addEventListener("keyup", event => {
+        if(event.key !== "Enter") return;
+        document.querySelector("#addButton").click();
+        event.preventDefault();
+    });
     loop()
 }
 

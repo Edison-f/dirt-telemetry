@@ -88,6 +88,7 @@ public class Parser {
         parsedData.add(parseSuspensionPosition(data));
         parsedData.add(parseSuspensionVelocity(data));
         parsedData.add(parseWheelVelocity(data));
+        parsedData.add(parseWheelSlip(data));
         return parsedData;
     }
 
