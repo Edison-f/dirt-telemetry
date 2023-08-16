@@ -2,13 +2,20 @@
 
 class Tachometer {
     WIDTH = 600;
-    HEIGHT = 600;
+    HEIGHT = 400;
     X_SCALE = 1.0;
     Y_SCALE = 1.0;
     draw(context, data) {
         const rpm = data["RPM"];
         const currRPM = rpm[0];
         const maxRPM = rpm[1] + 50;
+
+        context.save();
+        context.strokeStyle = "rgb(0, 0, 0)"
+        context.translate(0, 0);
+        context.lineWidth = 1;
+        context.strokeRect(0, 0, this.WIDTH, this.HEIGHT);
+        context.restore()
 
         context.lineWidth = 2;
         context.save();
